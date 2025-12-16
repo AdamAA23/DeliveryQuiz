@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Audio Control Button */
+        .audio-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .audio-control:hover {
+            background: #5568d3;
+            transform: scale(1.1);
+        }
+
+        .audio-control.muted {
+            background: #ccc;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .feedback-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .feedback-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .categories {
+            margin-bottom: 30px;
+        }
+
+        .categories-label {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .category-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .result.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .result-details {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 18px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .next-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .completion-screen h2 {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .final-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 20px 0;
+        }
+
+        .restart-btn {
+            padding: 18px 40px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Failure Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: scaleIn 0.3s ease-out;
+            position: relative;
+            z-index: 10000;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 32px;
+            color: #dc3545;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .modal-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-correct-answer {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .modal-correct-answer strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal-btn {
+            padding: 15px 40px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10001;
+        }
+
+        .modal-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="audio-control" id="audioToggle" title="Toggle Background Music">🔊</button>
+        
+        <div id="quizScreen">
+            <div class="header">
+                <h1>📝 Delivery - Level 1</h1>
+                <p style="color: #666;">selct the correct answer based on the question/customer insight below.</p>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">Question</div>
+                    <div class="score-value">
+                        <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span> 
+                    </div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Accuracy</div>
+                    <div class="score-value" id="accuracy">0%</div>
+                </div>
+            </div>
+
+            <div class="feedback-card">
+                <div class="feedback-label">Question</div>
+                <div class="feedback-text" id="feedbackText"></div>
+            </div>
+
+            <div class="categories">
+                <div class="categories-label">Choose Your Answer: </div>
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+
+            <div id="resultContainer"></div>
+
+            <button class="submit-btn" id="submitBtn">Submit Answer</button>
+        </div>
+
+        <div id="completionScreen" class="completion-screen hidden">
+            <h2>🎉 Quiz Complete!</h2>
+            <div class="final-score" id="finalScore"></div>
+            <p style="color: #666; font-size: 18px; margin: 20px 0;">Perfect score! You got all questions correct!</p>
+            <button class="restart-btn" onclick="location.reload()">Restart</button>
+        </div>
+    </div>
+
+    <!-- Failure Modal -->
+    <div id="failureModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-icon">❌</div>
+            <div class="modal-title">Quiz Failed!</div>
+            <div class="modal-message">Hard luck today, maybe today is not your day. You may happily return to your office now. <br><b>HAPPY WORKING!</b></div>
+            <div class="modal-correct-answer">
+                <strong>Correct Answer:</strong>
+                <span id="modalCorrectCategory"></span>
+            </div>
+            <button class="modal-btn" id="restartBtn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Audio System
+        const AudioSystem = {
+            backgroundMusic: null,
+            celebrationMusic: null,
+            isMuted: false,
+            isPaused: false,
+
+            init() {
+                this.startBackgroundMusic();
+            },
+
+            // Background music using audio file
+            startBackgroundMusic() {
+                if (this.backgroundMusic) return;
+                
+                this.backgroundMusic = new Audio('roundandround.mp3');
+                this.backgroundMusic.loop = true;
+                this.backgroundMusic.volume = 0.3; // Adjust volume (0.0 to 1.0)
+                
+                if (!this.isMuted && !this.isPaused) {
+                    this.backgroundMusic.play().catch(e => console.log('Audio play failed:', e));
+                }
+            },
+
+            pauseBackgroundMusic() {
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.pause();
+                }
+                this.isPaused = true;
+            },
+
+            resumeBackgroundMusic() {
+                if (this.backgroundMusic && !this.isMuted) {
+                    this.backgroundMusic.play().catch(e => console.log('Audio play failed:', e));
+                }
+                this.isPaused = false;
+            },
+
+            stopBackgroundMusic() {
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.pause();
+                    this.backgroundMusic.currentTime = 0;
+                }
+                this.isPaused = false;
+            },
+
+            // Celebration music for completion screen
+            startCelebrationMusic() {
+                this.stopBackgroundMusic(); // Stop background music
+                
+                this.celebrationMusic = new Audio('celebration-music.mp3');
+                this.celebrationMusic.loop = true;
+                this.celebrationMusic.volume = 0.4; // Adjust volume (0.0 to 1.0)
+                
+                if (!this.isMuted) {
+                    this.celebrationMusic.play().catch(e => console.log('Audio play failed:', e));
+                }
+            },
+
+            stopCelebrationMusic() {
+                if (this.celebrationMusic) {
+                    this.celebrationMusic.pause();
+                    this.celebrationMusic.currentTime = 0;
+                    this.celebrationMusic = null;
+                }
+            },
+
+            // Success sound - upward arpeggio
+            playSuccess() {
+                if (this.isMuted) return;
+                this.pauseBackgroundMusic();
+                
+                const sound = new Audio('applause.mp3');
+                sound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            },
+
+            // Partial success sound - neutral tones
+            //playPartial() {
+            //    if (this.isMuted) return;
+            //    this.pauseBackgroundMusic();
+                
+            //    const sound = new Audio('partial-sound.mp3');
+            //    sound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+             //   sound.play().catch(e => console.log('Audio play failed:', e));
+           // },
+
+            // Error sound - descending notes
+            playError() {
+                if (this.isMuted) return;
+                this.pauseBackgroundMusic();
+                
+                const sound = new Audio('cartoonfail.mp3');
+                sound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            },
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                return this.isMuted;
+            }
+        };
+
+        // Initialize audio on user interaction
+        let audioInitialized = false;
+        document.addEventListener('click', () => {
+            if (!audioInitialized) {
+                AudioSystem.init();
+                audioInitialized = true;
+            }
+        }, { once: true });
+
+        // Audio toggle button
+        document.getElementById('audioToggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!audioInitialized) {
+                AudioSystem.init();
+                audioInitialized = true;
+            }
+            const muted = AudioSystem.toggleMute();
+            e.target.textContent = muted ? '🔇' : '🔊';
+            e.target.classList.toggle('muted', muted);
+            
+            // Mute/unmute current playing audio
+            if (AudioSystem.backgroundMusic) {
+                AudioSystem.backgroundMusic.muted = muted;
+            }
+            if (AudioSystem.celebrationMusic) {
+                AudioSystem.celebrationMusic.muted = muted;
+            }
+        });
+
+        // Quiz Logic
+        const questions = [
+            {
+                feedback: "They mostly rushed to get everything done. They were disappointed that I had not finished my juice fast enough before takeoff. They left did not collect used items until the end of the flight. They were just friendly enough. It's probably too much to expect sincerity or warmth",
+                correctCategory: "Cabin Crew",
+                categories: ["Arrival", "Cabin Crew", "Golden Lounge", "Inflight Cabin"]
+            },
+            {
+                feedback: "Upon initiating a payment through the mobile application, there is a consistent delay in the transmission of a confirmation number and an email notification by MH. While, when using the website, the confirmation number and email ticket are promptly dispatched.",
+                correctCategory: "Digital",
+                categories: ["Digital", "Enrich", "Golden Lounge", "Inflight Cabin"]
+            },
+            {
+                feedback: "The taste of food was not good . Everything I tried was not at all tasty . Some airlines provide delicious meals . Making a delicious meal is not difficult . It's just the vendor that I think is wrong choice of the airline.",
+                correctCategory: "Inflight F&B",
+                categories: ["Arrival", "Golden Lounge", "Inflight Cabin", "Inflight F&B"]
+            },
+            {
+                feedback: "System restarted mid flight for everyone around me. Small touch screen was not responsive. Used the old fashioned controller instead. Vastly different from what's in newer planes. Best comedy was a 2013 French prank show.",
+                correctCategory: "Inflight Entertainment",
+                categories: ["Digital", "Enrich", "Golden Lounge", "Inflight Entertainment"]
+            },
+            {
+                feedback: "The toilet door didn't close by itself, and not every passenger was able to close it manually after use, so it remained open for a period. There was no sleep mask, socks, a teeth cleaning set, or other amenities that are usually present on Qatar flights.",
+                correctCategory: "Inflight Cabin",
+                categories: ["Cabin Crew", "Golden Lounge", "Inflight Cabin", "Inflight F&B"]
+            },
+            {
+                feedback: "The egg station guy pulled a long face, not friendly. The staff clearing dish making lots of noises, can't rest properly in the resting area. We moved from domestic to satellite golden lounge and it was better",
+                correctCategory: "Golden Lounge",
+                categories: ["Cabin Crew", "Golden Lounge", "Inflight Cabin", "Inflight F&B"]
+            },
+            {
+                feedback: "I need to change my title as Dr is not in my passport which is creating a lot of issues, but no one cares to assist me for this.  Eventually.. Emirates has a Watsap Number for Frequent Flyers, and they actually answer immediately in return.",
+                correctCategory: "Enrich",
+                categories: ["Cabin Crew", "Check-In", "Digital", "Enrich"]
+            },
+            {
+                feedback: "Because of the connecting flights I arrived at 9PM instead of 1.25PM, missed the wedding of a friend. First one of Malaysia Airlines who I spoke to, was very rude. Second one was lovely, she got me the voucher etc",
+                correctCategory: "Delay Handling",
+                categories: ["Arrival", "Boarding", "Check-In", "Delay Handling"]
+            },
+            {
+                feedback: "The arrival experience was smooth overall, but baggage delivery took longer than expected. Clearer directions for transit and faster luggage handling would make the arrival process more efficient and pleasant.",
+                correctCategory: "Arrival",
+                categories: ["Arrival", "Boarding", "Check-In", "Delay Handling"]
+            },
+            {
+                feedback: "Staff at Sydney appeared to be short temptered and rather than make an announcement over the public address system about group boarding, it was an abrupt lady making the announcements - the experience felt rushed.",
+                correctCategory: "Boarding",
+                categories: ["Arrival", "Boarding", "Cabin Crew", "Check-In"]
+            },
+            {
+                feedback: "Below are the dashboards delivered by the Delivery team, except:",
+                correctCategory: "Maswings",
+                categories: ["AMAL", "FY", "Maswings", "MH"]
+            },
+            {
+                feedback: "Which of the following is NOT a common sentiment category in Voice of Customer analysis?",
+                correctCategory: "Technical",
+                categories: ["Positive", "Negative", "Neutral", "Technical"]
+            },
+            {
+                feedback: "Which of the following is NOT listed as a touchpoint included in the dashboard?",
+                correctCategory: "Flight Booking",
+                categories: ["Digital", "Golden Lounge", "Flight Booking", "Inflight Entertainment"]
+            },
+            {
+                feedback: "Which case category has the highest percentage in the dashboard?",
+                correctCategory: "Complaint",
+                categories: ["Complaint", "Compliment", "Suggestion", "Neutral"]
+            },
+            {
+                feedback: "How many total touchpoints are included in the dashboard?",
+                correctCategory: "11",
+                categories: ["9", "10", "11", "12"]
+            },
+        ];
+
+        // Shuffle and select 10 random questions
+        function shuffleQuestions(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, 10); // Take only first 10 questions
+        }
+
+        // Select 10 random questions for this session
+        const allQuestions = [...questions];
+        const selectedQuestions = shuffleQuestions(allQuestions);
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedCategory = null;
+
+        function initQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            const feedbackText = document.getElementById('feedbackText');
+            
+            // Display feedback text without word spans
+            feedbackText.textContent = question.feedback;
+
+            // Create category buttons
+            const categoryGrid = document.getElementById('categoryGrid');
+            categoryGrid.innerHTML = question.categories.map(cat => 
+                `<button class="category-btn" onclick="selectCategory('${cat}')">${cat}</button>`
+            ).join('');
+
+            // Update question counter
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = selectedQuestions.length;
+
+            // Reset selections
+            selectedCategory = null;
+            document.getElementById('resultContainer').innerHTML = '';
+            document.getElementById('submitBtn').style.display = 'block';
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.textContent === category) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function checkAnswer() {
+            const question = selectedQuestions[currentQuestionIndex];
+            
+            // Check category only
+            const categoryCorrect = selectedCategory === question.correctCategory;
+
+            return {
+                categoryCorrect,
+                bothCorrect: categoryCorrect
+            };
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            if (!selectedCategory) {
+                alert('Please select a category!');
+                return;
+            }
+
+            const result = checkAnswer();
+            const question = selectedQuestions[currentQuestionIndex];
+
+            let resultHTML = '';
+            
+            if (result.categoryCorrect) {
+                score += 1;
+                AudioSystem.playSuccess(); // Play success sound
+                resultHTML = `
+                    <div class="result correct">
+                        <div class="result-title">✅ Correct!</div>
+                        <div class="result-details">
+                            You correctly identified the category!<br>
+                            <strong>+1 point</strong>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('resultContainer').innerHTML = resultHTML;
+                document.getElementById('submitBtn').style.display = 'none';
+
+                // Update score display
+                document.getElementById('score').textContent = score;
+                const accuracy = Math.round((score / (currentQuestionIndex + 1)) * 100);
+                document.getElementById('accuracy').textContent = accuracy + '%';
+
+                // Add next button or finish
+                if (currentQuestionIndex < selectedQuestions.length - 1) {
+                    const nextBtn = document.createElement('button');
+                    nextBtn.className = 'next-btn';
+                    nextBtn.textContent = 'Next Question →';
+                    nextBtn.onclick = () => {
+                        AudioSystem.resumeBackgroundMusic(); // Resume background music
+                        currentQuestionIndex++;
+                        initQuestion();
+                    };
+                    document.getElementById('resultContainer').appendChild(nextBtn);
+                } else {
+                    const finishBtn = document.createElement('button');
+                    finishBtn.className = 'next-btn';
+                    finishBtn.textContent = 'See Results';
+                    finishBtn.onclick = showCompletion;
+                    document.getElementById('resultContainer').appendChild(finishBtn);
+                }
+            } else {
+                // Wrong answer - show failure modal immediately
+                AudioSystem.playError(); // Play error sound
+                showFailureModal(question.correctCategory);
+            }
+        });
+
+        function showCompletion() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('completionScreen').classList.remove('hidden');
+            
+            const maxScore = selectedQuestions.length; // 1 point per question
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            document.getElementById('finalScore').textContent = `${score}/${maxScore} (${percentage}%)`;
+            
+            // Stop background music and start celebration music
+            AudioSystem.stopBackgroundMusic();
+            AudioSystem.startCelebrationMusic();
+        }
+
+        function showFailureModal(correctCategory) {
+            // Show the correct category in the modal
+            document.getElementById('modalCorrectCategory').textContent = correctCategory;
+            
+            // Display the modal
+            const modal = document.getElementById('failureModal');
+            modal.classList.remove('hidden');
+            
+            // Stop background music
+            AudioSystem.stopBackgroundMusic();
+            
+            // Add event listener to restart button
+            const restartBtn = document.getElementById('restartBtn');
+            restartBtn.onclick = function() {
+                window.location.reload();
+            };
+        }
+
+        function restartQuiz() {
+            location.reload();
+        }
+
+        // Initialize first question
+        initQuestion();
+    </script>
+</body>
+</html>
