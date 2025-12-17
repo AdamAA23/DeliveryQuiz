@@ -406,7 +406,7 @@
                 <div class="score-item">
                     <div class="score-label">Question</div>
                     <div class="score-value">
-                        <span id="currentQuestion">1</span>/<span id="totalQuestions">5</span> 
+                        <span id="currentQuestion">1</span>/<span id="totalQuestions">3</span> 
                     </div>
                 </div>
                 <div class="score-item">
@@ -675,7 +675,7 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            return shuffled.slice(0, 5); // Take only first 10 questions
+            return shuffled.slice(0, 3); // Take only first 10 questions
         }
 
         // Select 10 random questions for this session
@@ -830,4 +830,5 @@
 </body>
 
 </html>
+
 
