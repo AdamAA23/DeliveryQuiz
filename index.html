@@ -437,7 +437,7 @@
         <div id="completionScreen" class="completion-screen hidden">
             <h2>🎉 Quiz Complete!</h2>
             <div class="final-score" id="finalScore"></div>
-            <p style="color: #666; font-size: 18px; margin: 20px 0;">Perfect score! You got all questions correct!</p>
+            <p style="color: #666; font-size: 18px; margin: 20px 0;">Perfect score! You got all questions correct! You did it!!</p>
             <button class="restart-btn" onclick="location.reload()">Restart</button>
         </div>
     </div>
@@ -447,7 +447,7 @@
         <div class="modal-content">
             <div class="modal-icon">❌</div>
             <div class="modal-title">Quiz Failed!</div>
-            <div class="modal-message">Hard luck today, maybe today is not your day. You may happily return to your office now. <br><b>HAPPY WORKING!</b></div>
+            <div class="modal-message">Hard luck today, maybe today is not your day.</div>
             <div class="modal-correct-answer">
                 <strong>Correct Answer:</strong>
                 <span id="modalCorrectCategory"></span>
@@ -675,7 +675,7 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            return shuffled.slice(0, 10); // Take only first 10 questions
+            return shuffled.slice(0, 5); // Take only first 10 questions
         }
 
         // Select 10 random questions for this session
@@ -828,4 +828,5 @@
         initQuestion();
     </script>
 </body>
+
 </html>
